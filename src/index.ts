@@ -3,8 +3,9 @@ import mongoose from 'mongoose';
 import { createServer } from 'node:http';
 import { Server, Socket } from 'socket.io';
 import MessageService from './message/message.service';
+import AuthService from './auth/auth.service';
+import SendMessageDto from './message/dto/send-message.dto';
 
-const API_URL = "http://localhost:3000";
 
 const app = express()
 const server = createServer(app);
@@ -20,8 +21,21 @@ io.on('connection', (socket) =>{
   console.log("A user connected");
   socket.emit("UPDATE_CHAT", MessageService.loadChatData());
 
-  socket.on("SEND_MESSAGE", () => {
-    console.log("A client disconnected");
+  socket.on("SEND_MESSAGE", (dto: SendMessageDto) => {
+    console.log("A user send a message");
+    AuthService.getProfile(dto.accessToken, async (err,profile) => {
+      if(!profile){
+        console.log("Error when sending message: "+err);
+      }
+      else{
+        // Save message
+        console.log("Profile: "+profile.id +" - "+profile.name+" - "+profile.avt)
+        console.log("Message: "+dto.message)
+
+        await MessageService.insertMesssage(profile.id,dto.message);
+        MessageService.updateChatData(profile.id,dto.message);
+      }
+    })
   });
 
 

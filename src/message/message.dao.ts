@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { ChatMessageDto } from "./dto/chat-message.dto";
 const MessageSchema = require('./message.schema');
 
 
@@ -20,5 +21,14 @@ export default class MessageDao {
             }
         ]);
     }
-    //const currentDate = new Date().toLocaleString();
+
+    static async insertMessage(profileId: string, message: string){
+        await MessageModel.create({
+            "from" : profileId,
+            "message": message,
+            "timeStap": new Date().toLocaleString()
+        })
+
+    }
+    
 }
