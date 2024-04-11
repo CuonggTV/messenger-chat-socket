@@ -5,6 +5,7 @@ import { Server, Socket } from 'socket.io';
 import MessageService from './message/message.service';
 import AuthService from './auth/auth.service';
 import SendMessageDto from './message/dto/send-message.dto';
+import { UserDto } from './user/dto/user.dto';
 
 
 const app = express()
@@ -17,23 +18,24 @@ const io = new Server(server, {
 
 const port =  9000;
 
-io.on('connection', (socket) =>{
+io.on('connection',async (socket) =>{
   console.log("A user connected");
-  socket.emit("UPDATE_CHAT", MessageService.loadChatData());
+  socket.emit("UPDATE_CHAT",await MessageService.loadChatData());
 
   socket.on("SEND_MESSAGE", (dto: SendMessageDto) => {
     console.log("A user send a message");
-    AuthService.getProfile(dto.accessToken, async (err,profile) => {
-      if(!profile){
-        console.log("Error when sending message: "+err);
-      }
-      else{
+    AuthService.getProfile(dto.accessToken, async (err: Error | null, profile: UserDto | null) => {
+      if(profile){
         // Save message
         console.log("Profile: "+profile.id +" - "+profile.name+" - "+profile.avt)
         console.log("Message: "+dto.message)
 
-        await MessageService.insertMesssage(profile.id,dto.message);
-        MessageService.updateChatData(profile.id,dto.message);
+        await MessageService.insertMesssage(profile,dto.message);
+        io.emit("UPDATE_CHAT",await MessageService.loadChatData())
+        
+      }
+      else{
+        console.log("Error when sending message: "+err);
       }
     })
   });

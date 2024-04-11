@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-import { ChatMessageDto } from "./dto/chat-message.dto";
+import User from "../user/user.entity";
+import { UserDto } from "../user/dto/user.dto";
 const MessageSchema = require('./message.schema');
 
 
@@ -8,23 +9,30 @@ const MessageModel = mongoose.model('messages', MessageSchema)
 export default class MessageDao {
     static async getAll (){
         return await MessageModel.aggregate([  
+            {$unwind: '$from'}, // Unwind the from array
             {
-                $lookup: {
-                    from: "users",
-                    localField: "from",
-                    foreignField: "_id",
-                    as: "from",
-                },
+                $addFields: {
+                    "from.id": { $toString: "$from._id" }, // Convert _id to string type
+                    "from._id": "$$REMOVE", // Remove the original _id field
+                    "id": { $toString: "$_id" } // Convert _id to string type
+                }
             },
             {
-                $unwind: "$from"
+                $project: {
+                    __v: 0 ,
+                    _id: 0
+                }
             }
         ]);
     }
 
-    static async insertMessage(profileId: string, message: string){
+    // static async getAll(){
+    //     return await MessageModel.find({}).select('-__v');
+    // }
+
+    static async insertMessage(profile: UserDto, message: string){
         await MessageModel.create({
-            "from" : profileId,
+            "from" : profile,
             "message": message,
             "timeStap": new Date().toLocaleString()
         })

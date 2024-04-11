@@ -1,14 +1,16 @@
 import { Schema } from "mongoose";
-import { ObjectId } from "mongodb";
 
 export const MessageSchema = new Schema({
-    id:  {
-        type: ObjectId,
-        required: true,
-        auto: true,
+    from: {
+        type: {
+            id: String,
+            name: String,
+            avt: String
+        },
+        required: true
     },
-    from: String,
-    message: String,
+
+    messages: String,
     timeStap: String
 })
 
