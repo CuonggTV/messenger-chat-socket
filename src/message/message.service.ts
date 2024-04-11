@@ -4,14 +4,15 @@ import MessageDao from "./message.dao";
 
 export default class MessageService {
     static async loadChatData() {
-        const messages = await MessageDao.getAll();
+        const rawMessages = await MessageDao.getAll(); // Assuming this returns plain objects
 
         let chatData: ChatMessageDto[] ;
-        let i: number = 0
-        messages.forEach((mess) => {
-            console.log(mess.from._id)
-            
-        })
+        let j: number = 0;
+        for(let i =0;i<rawMessages.length;i++){
+            if(chatData[j].from.id == rawMessages.from.id ){
+
+            }
+        }
         
     }
     static updateChatData(profileId: string, message: string){

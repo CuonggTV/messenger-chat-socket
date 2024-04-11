@@ -2,6 +2,7 @@ import axios from "axios";
 import { UserDto } from "../user/dto/user.dto";
 
 const API_URL = "http://localhost:3000";
+
 export default class AuthService{
     static getProfile(accessToken: string, onResponse: (error: Error | null, profile: UserDto | null) => void) {
         // Create a REQUEST toward BE API to get Profile
